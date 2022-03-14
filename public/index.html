@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Ticket To Ride</title>
+
+  <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+
+  <script src="https://unpkg.com/@babel/polyfill@7/dist/polyfill.min.js"></script>
+  <style>
+    table.bordered-table th, td {
+      border: 1px solid silver; padding: 4px;
+    }
+    table.bordered-table {
+      border-collapse: collapse;
+    }
+    #nav {
+	    width: 100%;
+	    float: left;
+	    margin: 0 0 3em 0;
+	    padding: 0;
+	    list-style: none; 
+    }
+    #nav li {
+	    float: left; 
+      cursor: pointer;
+    }
+    #nav li a {
+		  display: block;
+		  padding: 8px 15px;
+		  text-decoration: none;
+		  font-weight: bold;
+		  color: #069;
+		  border-right: 1px solid #ccc; 
+    }
+    #nav li a {
+		  display: block;
+		  padding: 8px 15px;
+		  text-decoration: none;
+		  font-weight: bold;
+		  color: #069;
+		  border-right: 1px solid #ccc; 
+    }
+    .container {
+      width: 300px;
+      margin: auto;
+    }
+    .container h2 {
+      text-align: center;
+    }
+    .grid td {
+      width: 10px;
+      height: 10px;
+      padding: 15px 15px;
+      border: 2px solid orange;
+      text-align: center;
+      float: left;
+      margin: 5px;
+    }
+    .reserved {
+      background-color: red;
+      color: #fff;
+      display: inline-block;
+    }
+    .available {
+      background-color: orange;
+    }
+    #container2 {
+      margin:auto;
+      width: 210px;
+    }
+    .cell {
+      display: table-cell;
+      text-align: center;
+      vertical-align: middle;
+      line-height: 44px;    
+    }
+    #example_a {
+      width: 10px;
+      height: 10px;
+      padding: 15px 15px;
+      border: 2px solid orange;
+      background-color: orange;
+    }
+    #example_r {
+      width: 10px;
+      height: 10px;
+      padding: 15px 15px;
+      border: 2px solid orange;
+      background-color: red;
+    }
+    #free {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="contents"></div>
+
+  <script src="/App.js"></script>
+</body>
+
+</html>

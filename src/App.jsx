@@ -77,8 +77,8 @@ class DeleteTraveller extends React.Component {
   render() {
     return (
       <form name="recordDel" onSubmit={this.handleSubmit_del}>
-        <input type="text" name="name" placeholder="Name" />
-        <input type="text" name="phone" placeholder="Phone Number" />
+        <input type="text" name="name" placeholder="Name to Delete" />
+        <input type="text" name="phone" placeholder="Phone Number to Delete" />
         <button>Delete</button>
       </form>
     );

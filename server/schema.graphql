@@ -8,13 +8,11 @@ type Record {
   timestamp: GraphQLDate!
 }
 
-"Toned down Issue, used as inputs, without server generated values."
 input RecordInputs {
   name: String!
   phone: String!
 }
 
-##### Top level declarations
 type Query {
   about: String!
   recordList: [Record!]!

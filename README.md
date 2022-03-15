@@ -10,6 +10,8 @@ npm install --save-dev @babel/preset-react@7
 npm install --no-save @babel/plugin-transform-arrow-functions@7
 npm uninstall @babel/plugin-transform-arrow-functions@7
 npm install --save-dev @babel/preset-env
+npm install graphql@0 apollo-server-express@2
+npm install mongodb@3
 
 npx babel src --presets @babel/react --out-dir public
 node server/server.js

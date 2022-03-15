@@ -1,12 +1,6 @@
 const { MongoClient } = require('mongodb');
 
-const url = 'mongodb://localhost/issuetracker';
-
-// Atlas URL  - replace UUU with user, PPP with password, XXX with hostname
-// const url = 'mongodb+srv://UUU:PPP@cluster0-XXX.mongodb.net/issuetracker?retryWrites=true';
-
-// mLab URL - replace UUU with user, PPP with password, XXX with hostname
-// const url = 'mongodb://UUU:PPP@XXX.mlab.com:33533/issuetracker';
+const url = 'mongodb://localhost/traveller';
 
 function testWithCallbacks(callback) {
   console.log('\n--- testWithCallbacks ---');
@@ -19,10 +13,10 @@ function testWithCallbacks(callback) {
     console.log('Connected to MongoDB');
 
     const db = client.db();
-    const collection = db.collection('employees');
+    const collection = db.collection('customers');
 
-    const employee = { id: 1, name: 'A. Callback', age: 23 };
-    collection.insertOne(employee, function(err, result) {
+    const customer = { id: 1, name: 'A', phone: '11111111' };
+    collection.insertOne(customer, function(err, result) {
       if (err) {
         client.close();
         callback(err);
@@ -51,15 +45,27 @@ async function testWithAsync() {
     await client.connect();
     console.log('Connected to MongoDB');
     const db = client.db();
-    const collection = db.collection('employees');
+    const collection = db.collection('customers');
 
-    const employee = { id: 2, name: 'B. Async', age: 16 };
-    const result = await collection.insertOne(employee);
+    const customer = { id: 2, name: 'B', phone: '22222222' };
+    const result = await collection.insertOne(customer);
     console.log('Result of insert:\n', result.insertedId);
-
-    const docs = await collection.find({ _id: result.insertedId })
+    var docs = await collection.find({ _id: result.insertedId })
       .toArray();
     console.log('Result of find:\n', docs);
+
+    const result_u = await collection.updateOne({name: 'A'}, { $set: {phone: '99999999'}});
+    console.log('id of the updated document:\n', result_u.connection.id);
+    docs = await collection.find({ id: result_u.connection.id })
+    .toArray();
+    console.log('Result of find:\n', docs);
+
+    docs = await collection.find({}).toArray();
+    console.log('Before deletion:\n', docs);
+    const result_d = await collection.deleteOne({id: 2});
+    docs = await collection.find({}).toArray();
+    console.log('After deletion:\n', docs);
+
   } catch(err) {
     console.log(err);
   } finally {

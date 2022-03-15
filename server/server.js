@@ -7,12 +7,6 @@ const { MongoClient } = require('mongodb');
 
 const url = 'mongodb://localhost/traveller';
 
-// Atlas URL  - replace UUU with user, PPP with password, XXX with hostname
-// const url = 'mongodb+srv://UUU:PPP@cluster0-XXX.mongodb.net/issuetracker?retryWrites=true';
-
-// mLab URL - replace UUU with user, PPP with password, XXX with hostname
-// const url = 'mongodb://UUU:PPP@XXX.mlab.com:33533/issuetracker';
-
 let db;
 
 let aboutMessage = "Singapore-Thailand High-Speed Railway Reservation System";
@@ -96,9 +90,9 @@ async function updateFollowingID(target, total) {
 }
 
 async function recordDelete(_, { record }) {
-  const hit = await db.collection('records').find({name: record.name}).count();
+  const hit = await db.collection('records').find({name: record.name, phone: record.phone}).count();
   if (hit == 0) {
-    throw new UserInputError("Sorry, you don't have a booking yet!");
+    throw new UserInputError("Sorry, we cannot find your booking. Please check the name and phone number!");
   }
   const target = await db.collection('records').findOne({name: record.name});
   const tid = target['id'];

@@ -5,7 +5,7 @@ const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql/language');
 const { MongoClient } = require('mongodb');
 
-const url = 'mongodb://localhost/issuetracker';
+const url = 'mongodb://localhost/traveller';
 
 // Atlas URL  - replace UUU with user, PPP with password, XXX with hostname
 // const url = 'mongodb+srv://UUU:PPP@cluster0-XXX.mongodb.net/issuetracker?retryWrites=true';
@@ -15,7 +15,7 @@ const url = 'mongodb://localhost/issuetracker';
 
 let db;
 
-let aboutMessage = "Issue Tracker API v1.0";
+let aboutMessage = "Singapore-Thailand High-Speed Railway Reservation System";
 
 const GraphQLDate = new GraphQLScalarType({
   name: 'GraphQLDate',
@@ -38,11 +38,13 @@ const GraphQLDate = new GraphQLScalarType({
 const resolvers = {
   Query: {
     about: () => aboutMessage,
-    issueList,
+    recordList,
   },
   Mutation: {
     setAboutMessage,
-    issueAdd,
+    recordAdd,
+    recordDelete,
+    createBlackList
   },
   GraphQLDate,
 };
@@ -51,9 +53,9 @@ function setAboutMessage(_, { message }) {
   return aboutMessage = message;
 }
 
-async function issueList() {
-  const issues = await db.collection('issues').find({}).toArray();
-  return issues;
+async function recordList() {
+  const records = await db.collection('records').find({}).toArray();
+  return records;
 }
 
 async function getNextSequence(name) {
@@ -65,28 +67,56 @@ async function getNextSequence(name) {
   return result.value.current;
 }
 
-function issueValidate(issue) {
-  const errors = [];
-  if (issue.title.length < 3) {
-    errors.push('Field "title" must be at least 3 characters long.');
+async function recordAdd(_, { record }) {
+  const hit_bl = await db.collection('blacklist').find({name: record.name, phone: record.phone}).count();
+  if (hit_bl > 0){
+    throw new UserInputError('Sorry, this customer is blacklisted!');
   }
-  if (issue.status === 'Assigned' && !issue.owner) {
-    errors.push('Field "owner" is required when status is "Assigned"');
+  const hit = await db.collection('records').find({name: record.name}).count();
+  if (hit > 0) {
+    throw new UserInputError('Sorry, there is a booking under this name!');
   }
-  if (errors.length > 0) {
-    throw new UserInputError('Invalid input(s)', { errors });
-  }
+  record.timestamp = new Date();
+  record.id = await getNextSequence('records');
+
+  const result = await db.collection('records').insertOne(record);
+  const savedRecord = await db.collection('records')
+    .findOne({ _id: result.insertedId });
+  return savedRecord;
 }
 
-async function issueAdd(_, { issue }) {
-  issueValidate(issue);
-  issue.created = new Date();
-  issue.id = await getNextSequence('issues');
+async function updateFollowingID(target, total) {
+  for (let i=target+1; i<=total; i++){
+    const result = await db.collection('records').updateOne(
+      { id: i },
+      { $inc: { id: 1 } }
+    );
+  }
+  return "Done";
+}
 
-  const result = await db.collection('issues').insertOne(issue);
-  const savedIssue = await db.collection('issues')
-    .findOne({ _id: result.insertedId });
-  return savedIssue;
+async function recordDelete(_, { record }) {
+  const hit = await db.collection('records').find({name: record.name}).count();
+  if (hit == 0) {
+    throw new UserInputError("Sorry, you don't have a booking yet!");
+  }
+  const target = await db.collection('records').findOne({name: record.name});
+  const tid = target['id'];
+  const result_del = await db.collection('records').deleteOne({
+    name: record.name, phone: record.phone},);
+  const result_upd = await db.collection('records').updateMany(
+    {id: {$gt:tid}}, {$inc: {id: -1}},)
+  const result_cnt = await db.collection('counters').findOneAndUpdate(
+      { _id: 'records' }, { $inc: { current: -1 } },{ returnOriginal: false },);
+  return result_del;
+}
+
+async function createBlackList(_, { name, phone }) {
+  const hit = await db.collection('blacklist').find({name: name, phone: phone}).count();
+  if (hit == 0)  {
+    const result = await db.collection('blacklist').insertOne({name: name, phone: phone});
+    return "Done"
+  }
 }
 
 async function connectToDb() {
@@ -114,6 +144,9 @@ server.applyMiddleware({ app, path: '/graphql' });
 (async function () {
   try {
     await connectToDb();
+    db.collection('records').createIndex({ id: 1 }, { unique: true });
+    db.collection('records').createIndex({ name: 1 });
+    db.collection('records').createIndex({ phone: 1 });
     app.listen(3000, function () {
       console.log('App started on port 3000');
     });

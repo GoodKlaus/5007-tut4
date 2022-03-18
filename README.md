@@ -14,5 +14,6 @@ npm install graphql@0 apollo-server-express@2
 npm install mongodb@3
 
 npx babel src --presets @babel/react --out-dir public
+mongo traveller scripts/init.mongo.js
 node server/server.js
 ```
